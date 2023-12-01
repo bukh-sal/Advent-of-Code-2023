@@ -18,6 +18,14 @@ List<int> parseNumbers(String text) {
 
 void main(List<String> arguments) {
   List<String> text = File('input.txt').readAsLinesSync();
-  List<int> textAsInts = parseNumbers(text[0]);
-  print(textAsInts);
+
+  int total = 0;
+  for (int i = 0; i < text.length; i++) {
+    List<int> entry = parseNumbers(text[i]);
+    int firstNumber = entry[0];
+    int lastNumber = entry[entry.length - 1];
+    total = total + firstNumber * 10 + lastNumber;
+  }
+
+  print(total);
 }
