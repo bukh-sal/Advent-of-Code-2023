@@ -1,6 +1,22 @@
 import 'dart:io';
 
 List<int> parseNumbers(String text) {
+  print('before $text');
+
+  text = text.replaceAll('one', '1');
+  text = text.replaceAll('two', '2');
+  text = text.replaceAll('six', '6');
+
+  text = text.replaceAll('four', '4');
+  text = text.replaceAll('five', '5');
+  text = text.replaceAll('nine', '9');
+
+  text = text.replaceAll('three', '3');
+  text = text.replaceAll('seven', '7');
+  text = text.replaceAll('eight', '8');
+
+  print('after $text');
+
   List<String> textAsList = text.split('');
   List<int> results = [];
 
