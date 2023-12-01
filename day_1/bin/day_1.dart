@@ -1,3 +1,5 @@
+import 'dart:io';
+
 List<int> parseNumbers(String text) {
   List<String> textAsList = text.split('');
   List<int> results = [];
@@ -15,7 +17,7 @@ List<int> parseNumbers(String text) {
 }
 
 void main(List<String> arguments) {
-  String text = 'pqr3stu8vwx';
-  List<int> textAsInts = parseNumbers(text);
+  List<String> text = File('input.txt').readAsLinesSync();
+  List<int> textAsInts = parseNumbers(text[0]);
   print(textAsInts);
 }
