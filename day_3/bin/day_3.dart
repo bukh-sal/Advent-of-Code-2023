@@ -3,31 +3,9 @@
 import 'dart:io';
 import 'dart:math';
 
-import 'package:image/image.dart';
-
-void saveAsImage(List<List<int>> heatMap, String path) {
-  int width = heatMap[0].length;
-  int height = heatMap.length;
-  print('width: $width, height: $height');
-
-  Image image = Image(height: height, width: width);
-
-  for (int row = 0; row < height; row++){
-    for (int col = 0; col < width; col++){
-      if (heatMap[row][col] == 1){
-        image.setPixelRgba(col, row, 255, 255, 255, 255);
-      } else {
-        image.setPixelRgba(col, row, 0, 0, 0, 255);
-      }
-    }
-  }
-
-  File(path).writeAsBytesSync(encodePng(image));
-}
 
 String replaceSymbols(String line, [String replaceWith = "."]){
     line = line.replaceAll(RegExp(r"[^\w\s]"), replaceWith);
-    print(line);
     return line;
 }
 
@@ -67,11 +45,9 @@ void fillHeatMap(List<String> raw) {
       String char = lineItems[charIdx];
       if (char == "X") {
         lineItems[charIdx] = 'Z';
-        print('$lineItems has X is ${lineItems.contains('X')}');
         addHeatPoint(line_idx, charIdx);
       }
     }
-    print('------');
   }
 }
 
@@ -137,17 +113,6 @@ void main(List<String> arguments) {
 
 
   print('-----------------');
-
-
-  // save heat map as an image, where 0 is black and 1 is white
-
-
-  saveAsImage(heatMap, 'heat_map.png');
-
-
-
-
-
 
   print("Unique Values Sum = $unique_sol");
   print("All Values Sum    = $total_sum");
