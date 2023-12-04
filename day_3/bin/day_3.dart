@@ -21,17 +21,25 @@ void generateHeatMap(List<String> raw){
   }
 }
 
-void addHeatPoint(int row, int col, [int radius = 1]){
+void addHeatPoint(int row, int col, [int radius = 1, includeCorners=true]){
   int minRow = max(0, row - radius);
   int minCol = max(0, col - radius);
 
   int maxRow = min(lineCount - 1, row + radius);
   int maxCol = min(lineLength, col + radius);
 
-  for (int rowIdx = minRow; rowIdx <= maxRow; rowIdx++){
-    for (int colIdx = minCol; colIdx <= maxCol; colIdx++){
-      heatMap[rowIdx][colIdx] = 1;
+  if (includeCorners) { 
+    for (int rowIdx = minRow; rowIdx <= maxRow; rowIdx++){
+      for (int colIdx = minCol; colIdx <= maxCol; colIdx++){
+        heatMap[rowIdx][colIdx] = 1;
+      }
     }
+  } else {
+    heatMap[row][col] = 1;
+    heatMap[minRow][col] = 1;
+    heatMap[maxRow][col] = 1;
+    heatMap[row][minCol] = 1;
+    heatMap[row][maxCol] = 1;
   }
 }
 
@@ -61,6 +69,7 @@ void main(List<String> arguments) {
   int unique_sol = 0;
   int total_sum = 0;
   //print(raw);
+  List<int> uniqueIncludedNums = [];
   List<int> includedNums = [];
 
   lineCount = raw.length;
@@ -97,22 +106,31 @@ void main(List<String> arguments) {
 
       //print('item $item has locations $locations');
       if (isIn){
+        stdout.write('$item ');
         int partNumber = int.parse(item);
 
         total_sum = total_sum + partNumber;
-
-        if (!includedNums.contains(partNumber)){
-        unique_sol = unique_sol + partNumber;
         includedNums.add(partNumber);
-        //print('added $item');
+
+        if (!uniqueIncludedNums.contains(partNumber)){
+        unique_sol = unique_sol + partNumber;
+        uniqueIncludedNums.add(partNumber);
         }
       }
     }
+        stdout.write('\n');
   }
 
 
 
   print('-----------------');
+
+  int total_inc = 0;
+  for (int a = 0; a < includedNums.length; a++){
+    total_inc = total_inc + includedNums[a];
+  }
+
+  print('total of included nums $total_inc');
 
   print("Unique Values Sum = $unique_sol");
   print("All Values Sum    = $total_sum");
