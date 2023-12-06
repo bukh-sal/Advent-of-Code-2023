@@ -1,5 +1,6 @@
 // ignore_for_file: non_constant_identifier_names
 
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
@@ -21,12 +22,14 @@ void generateHeatMap(List<String> raw){
   }
 }
 
-void addHeatPoint(int row, int col, [int radius = 1, includeCorners=true]){
-  int minRow = max(0, row - radius);
-  int minCol = max(0, col - radius);
+void addHeatPoint(int row, int col){
+  bool includeCorners=true;
+  
+  int minRow = max(0, row - 1);
+  int minCol = max(0, col - 1);
 
-  int maxRow = min(lineCount - 1, row + radius);
-  int maxCol = min(lineLength, col + radius);
+  int maxRow = min(lineCount - 1, row + 1);
+  int maxCol = min(lineLength - 1, col + 1);
 
   if (includeCorners) { 
     for (int rowIdx = minRow; rowIdx <= maxRow; rowIdx++){
@@ -34,6 +37,7 @@ void addHeatPoint(int row, int col, [int radius = 1, includeCorners=true]){
         heatMap[rowIdx][colIdx] = 1;
       }
     }
+  // ignore: dead_code
   } else {
     heatMap[row][col] = 1;
     heatMap[minRow][col] = 1;
@@ -46,30 +50,51 @@ void addHeatPoint(int row, int col, [int radius = 1, includeCorners=true]){
 void fillHeatMap(List<String> raw) {
   for (int line_idx = 0; line_idx < raw.length; line_idx++){
     String line = raw[line_idx];
-    String tmpLine = line.replaceAll(".", "Z");
-    tmpLine = tmpLine.replaceAll(RegExp(r"[^\w\s]"), 'X');
-    List<String> lineItems = tmpLine.split('');
-    for (int charIdx = 0; charIdx < lineItems.length; charIdx++) {
-      String char = lineItems[charIdx];
-      if (char == "X") {
-        lineItems[charIdx] = 'Z';
+
+    line = line.replaceAll(".", "N");
+    line = line.replaceAll(RegExp(r"[^\w\s]"), 'X');
+
+    List<String> lineChars = line.split('');
+    for (int charIdx = 0; charIdx < lineChars.length; charIdx++) {
+      String char = lineChars[charIdx];
+      if (char == 'X') {
+        lineChars[charIdx] = 'N';
         addHeatPoint(line_idx, charIdx);
       }
     }
+
   }
+}
+
+List<String> get_numbers(String line){
+  List<String> numbers = [];
+
+  String stack = '';
+
+  List<String> validChars = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'];
+
+  List<String> letters = line.split('');
+  for (int charIdx = 0; charIdx < letters.length; charIdx++){
+    String char = letters[charIdx];
+    if (validChars.contains(char)) {
+      stack = stack + char;
+    } else {
+      if (stack != '') {
+        numbers.add(stack);
+      }
+      stack = '';
+    }
+
+  }
+
+  return numbers;
 }
 
 
 void main(List<String> arguments) {
   List<String> raw = File('input.txt').readAsLinesSync();
-  for (var element in raw) {
-    element = element.replaceAll(' ', '.');
-  }
 
-  int unique_sol = 0;
   int total_sum = 0;
-  //print(raw);
-  List<int> uniqueIncludedNums = [];
   List<int> includedNums = [];
 
   lineCount = raw.length;
@@ -81,41 +106,28 @@ void main(List<String> arguments) {
 
   for (int line_idx = 0; line_idx < raw.length; line_idx++){
     String line = raw[line_idx];
-    line = replaceSymbols(line);
+    String modedLine = replaceSymbols(line);
 
+    //List<String> numbers = get_numbers(modedLine);
+    List<String> sep = modedLine.split('.');    
 
-    List<String> sep = line.split('.');
-    for (var item in sep){
-      if (item == '0' || item == ""){
-        continue;
-      }
-
-      int startsFrom = line.indexOf(item);
-      int endsAt = startsFrom + item.length - 1;
-      List<Map<int, int>> locations = [];
-
-
+    for (var number in sep){
+      int startsFrom = line.indexOf(number);
+      int endsAt = startsFrom + number.length - 1;
       bool isIn = false;
+
+
       for (int loc = startsFrom; loc <= endsAt; loc++){
-        locations.add({line_idx:loc});
-        //print('$item - checked location $line_idx $loc');
         if (heatMap[line_idx][loc] == 1){
           isIn = true;
         }
       }
 
-      //print('item $item has locations $locations');
       if (isIn){
-        stdout.write('$item ');
-        int partNumber = int.parse(item);
-
+        stdout.write('$number ');
+        int partNumber = int.parse(number);
         total_sum = total_sum + partNumber;
         includedNums.add(partNumber);
-
-        if (!uniqueIncludedNums.contains(partNumber)){
-        unique_sol = unique_sol + partNumber;
-        uniqueIncludedNums.add(partNumber);
-        }
       }
     }
         stdout.write('\n');
@@ -123,15 +135,13 @@ void main(List<String> arguments) {
 
 
 
-  print('-----------------');
 
+  print('-----------------');
   int total_inc = 0;
   for (int a = 0; a < includedNums.length; a++){
-    total_inc = total_inc + includedNums[a];
+      total_inc = total_inc + includedNums[a];
   }
 
   print('total of included nums $total_inc');
-
-  print("Unique Values Sum = $unique_sol");
   print("All Values Sum    = $total_sum");
 }
